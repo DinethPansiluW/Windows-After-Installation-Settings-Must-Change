@@ -128,7 +128,6 @@ echo !INPUT! | findstr /r "^ *[0-9][0-9]* *$" >nul || (
     goto OPTION_3
 )
 set "INPUT=!INPUT: =!"
-set /a INPUT=!INPUT!-1
 powercfg /change hibernate-timeout-ac !INPUT!
 powercfg /setactive SCHEME_CURRENT >nul
 timeout /t 1 >nul
@@ -145,7 +144,6 @@ echo !INPUT! | findstr /r "^ *[0-9][0-9]* *$" >nul || (
     goto OPTION_4
 )
 set "INPUT=!INPUT: =!"
-set /a INPUT=!INPUT!-1
 powercfg /change hibernate-timeout-dc !INPUT!
 powercfg /setactive SCHEME_CURRENT >nul
 timeout /t 1 >nul
