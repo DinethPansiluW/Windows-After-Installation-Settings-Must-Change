@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 
 :: Set full screen
-mode con: cols=700 lines=60
+mode con: cols=90 lines=70
 
 title Windows Unwanted Services Manager
 
