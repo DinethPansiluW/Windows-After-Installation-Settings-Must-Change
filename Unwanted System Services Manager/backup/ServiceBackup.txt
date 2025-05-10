@@ -1,0 +1,12 @@
+REM Backup created on 04/25/2025 15:53:01.97
+Spooler AUTO_START Running
+SysMain DISABLED Stopped
+wuauserv DISABLED Stopped
+W32Time AUTO_START Stopped
+Schedule AUTO_START Running
+WerSvc DISABLED Stopped
+TermService DEMAND_START Stopped
+WinDefend AUTO_START Running
+BITS DEMAND_START Stopped
+WSearch DISABLED Stopped
+HyperV DISABLED Stopped
