@@ -1,7 +1,6 @@
-
 @echo off
 rem — Define your services and display names here —
-set numServices=11
+set numServices=12
 
 set services[1]=Spooler
 set names[1]=Print Spooler
@@ -46,3 +45,7 @@ set desc[10]=Indexing/search; disabling slows search.
 set services[11]=HyperV
 set names[11]=Launch Hyper-V
 set desc[11]=Disabing may can't run virtual matchines.
+
+set services[12]=BITS
+set names[12]=Background Intelligent Transfer Service
+set desc[12]=Transfers files in the background using idle network bandwidth; disabling may break updates and downloads.
