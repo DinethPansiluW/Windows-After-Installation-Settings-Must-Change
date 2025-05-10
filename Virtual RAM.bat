@@ -22,7 +22,7 @@ echo Free Space  : !FreeGB! GB
 echo.
 
 echo [Current Virtual Memory Settings]
-wmic pagefileset get Name, InitialSize, MaximumSize /format:table
+powershell -command "Get-WmiObject Win32_PageFileSetting | Format-Table Name, InitialSize, MaximumSize -AutoSize"
 echo.
 
 :ask_ram
@@ -44,13 +44,38 @@ echo Initial Size : %initialMB% MB
 echo Maximum Size : %maxMB% MB
 echo.
 
-wmic computersystem where name="%computername%" set AutomaticManagedPagefile=False >nul
-wmic pagefileset where name="C:\\pagefile.sys" set InitialSize=%initialMB%,MaximumSize=%maxMB% >nul
+REM Disable automatic management via registry
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "AutoManagePagefiles" /t REG_DWORD /d 0 /f >nul
 
+REM Set pagefile parameters in registry
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "PagingFiles" /t REG_MULTI_SZ /d "C:\pagefile.sys %initialMB% %maxMB%" /f >nul
+
+REM Create or update pagefile using WMI
+powershell -command ^
+    "try { ^
+        \$pagefile = Get-WmiObject Win32_PageFileSetting | Where-Object { \$_.Name -eq 'C:\\pagefile.sys' }; ^
+        if (-not \$pagefile) { ^
+            \$class = [wmiclass]'Win32_PageFileSetting'; ^
+            \$new = \$class.CreateInstance(); ^
+            \$new.Name = 'C:\\pagefile.sys'; ^
+            \$new.InitialSize = %initialMB%; ^
+            \$new.MaximumSize = %maxMB%; ^
+            \$new.Put() ^
+        } else { ^
+            \$pagefile.InitialSize = %initialMB%; ^
+            \$pagefile.MaximumSize = %maxMB%; ^
+            \$pagefile.Put() ^
+        } ^
+    } catch { ^
+        echo Error configuring pagefile: $_ ^
+        exit 1 ^
+    }"
+
+echo.
 echo Virtual memory settings updated successfully!
 echo.
 echo [Updated Virtual Memory Settings]
-wmic pagefileset get Name, InitialSize, MaximumSize /format:table
+powershell -command "Get-WmiObject Win32_PageFileSetting | Format-Table Name, InitialSize, MaximumSize -AutoSize"
 echo.
 echo NOTE: Changes will take effect after system restart.
 pause
