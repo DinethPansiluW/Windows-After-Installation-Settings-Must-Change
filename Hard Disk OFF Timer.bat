@@ -1,92 +1,125 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal EnableDelayedExpansion
 
-:: Enable ANSI escape codes
-reg query HKCU\Console /v VirtualTerminalLevel 2>nul | find "0x1" >nul || (
-    reg add HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
-)
+rem =====================================================
+rem  HARD DISK TIMEOUT CONTROL PANEL (Live Status Fix)
+rem =====================================================
 
-for /f %%a in ('echo prompt $E^| cmd') do set "ESC=%%a"
+:: Define color codes
+set "GREEN=[32m"
+set "RED=[31m"
+set "ORANGE=[33m"
+set "RESET=[0m"
+set "PINK=[1;35m"
 
-:: Elevate to admin
-NET FILE 1>nul 2>nul || (
-    powershell -Command "Start-Process cmd -ArgumentList '/c \"%~f0\"' -Verb RunAs"
-    exit /b
-)
-
-:: Power setting GUIDs
-set "GUID_DISK=0012ee47-9041-4b5d-9b77-535fba8b1442"
-set "GUID_DISK_TIMEOUT=6738e2c4-e8a5-4a42-b16a-e040e769756e"
-
-:main
+:show_panel
 cls
-echo %ESC%[1;36m========================================
-echo      HARD DISK TIMEOUT CONTROL PANEL
-echo ========================================%ESC%[0m
+echo %PINK%========================================%RESET%
+echo %GREEN%     HARD DISK TIMEOUT CONTROL PANEL%RESET%
+echo %PINK%========================================%RESET%
 
-:: Read current timeouts (seconds) - FIXED PARSING
-for /f "tokens=2 delims=()" %%A in (
-    'powercfg /query SCHEME_CURRENT %GUID_DISK% %GUID_DISK_TIMEOUT% ^| findstr /c:"Current AC Power Setting Index"'
-) do set "AC_SECS=%%A"
-for /f "tokens=2 delims=()" %%A in (
-    'powercfg /query SCHEME_CURRENT %GUID_DISK% %GUID_DISK_TIMEOUT% ^| findstr /c:"Current DC Power Setting Index"'
-) do set "DC_SECS=%%A"
+rem 1) Get active power plan GUID
+for /f "tokens=4" %%G in ('powercfg /getactivescheme') do set "scheme=%%G"
 
-set /a AC_MIN=AC_SECS/60 2>nul || set AC_MIN=0
-set /a DC_MIN=DC_SECS/60 2>nul || set DC_MIN=0
-
-echo %ESC%[1mCurrent Timeouts:%ESC%[0m
-if %AC_MIN% EQU 0 (
-    echo [AC Power]  Never
-) else (
-    echo [AC Power]  %AC_MIN% Minutes
+rem 2) Query DC (On battery) idle timeout
+for /f "tokens=2 delims=:" %%S in ('powercfg /query !scheme! 0012ee47-9041-4b5d-9b77-535fba8b1442 6738e2c4-e8a5-4a42-b16a-e040e769756e ^| findstr /c:"Current DC Power Setting Index"') do (
+  set "dc_hex=%%S"
+  for /f "tokens=* delims= " %%h in ("!dc_hex!") do set "dc_hex=%%h"
+  set /a dc_seconds=!dc_hex!
 )
-if %DC_MIN% EQU 0 (
-    echo [Battery]   Never
-) else (
-    echo [Battery]   %DC_MIN% Minutes
+
+rem 3) Query AC (Plugged in) idle timeout
+for /f "tokens=2 delims=:" %%S in ('powercfg /query !scheme! 0012ee47-9041-4b5d-9b77-535fba8b1442 6738e2c4-e8a5-4a42-b16a-e040e769756e ^| findstr /c:"Current AC Power Setting Index"') do (
+  set "ac_hex=%%S"
+  for /f "tokens=* delims= " %%h in ("!ac_hex!") do set "ac_hex=%%h"
+  set /a ac_seconds=!ac_hex!
 )
-echo %ESC%[1;36m========================================%ESC%[0m
+
+rem 4) Convert to minutes
+set /a dc_minutes = dc_seconds / 60
+set /a ac_minutes = ac_seconds / 60
+
+rem 5) Show results
+echo %ORANGE%Plugged in%RESET%  - !ac_minutes! minute
+echo %ORANGE%On battery%RESET%  - !dc_minutes! minute
+
+echo %PINK%========================================%RESET%
 echo.
-echo 1. Set AC Timeout
-echo 2. Set Battery Timeout
+echo %GREEN%1.%RESET% Set AC Timeout
+echo %GREEN%2.%RESET% Set Battery Timeout
 echo.
+set /p choice="Select option (1-2): "
 
-choice /c 12 /n /m "Select option (1-2): "
-set "CHOICE=%ERRORLEVEL%"
-
-if "%CHOICE%"=="1" goto SET_AC
-if "%CHOICE%"=="2" goto SET_DC
-goto main
-
-:SET_AC
-cls
-echo Current AC Timeout: %AC_MIN% minutes
-set "MIN="
-set /p "MIN=Enter new timeout (in minutes, 0 for Never): "
-if not defined MIN goto main
-echo %MIN% | findstr /r "^[0-9]*$" >nul || (
-    echo %ESC%[31mInvalid input. Use numbers only.%ESC%[0m
-    timeout /t 2 >nul
-    goto SET_AC
+if "%choice%"=="1" (
+    set "mode=AC"
+    goto set_timeout
+) else if "%choice%"=="2" (
+    set "mode=DC"
+    goto set_timeout
+) else (
+    echo.
+    echo %RED%Invalid choice "%choice%". Please enter 1 or 2.%RESET%
+    pause
+    goto show_panel
 )
-set /a "SECONDS=MIN*60"
-powercfg /setacvalueindex SCHEME_CURRENT %GUID_DISK% %GUID_DISK_TIMEOUT% %SECONDS% >nul
-powercfg /setactive SCHEME_CURRENT >nul
-goto main
 
-:SET_DC
-cls
-echo Current Battery Timeout: %DC_MIN% minutes
-set "MIN="
-set /p "MIN=Enter new timeout (in minutes, 0 for Never): "
-if not defined MIN goto main
-echo %MIN% | findstr /r "^[0-9]*$" >nul || (
-    echo %ESC%[31mInvalid input. Use numbers only.%ESC%[0m
-    timeout /t 2 >nul
-    goto SET_DC
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:get_timeout  modeVar  outVar
+  set "%~2="
+  if /I "%~1"=="AC" (
+    for /f "tokens=* delims=" %%L in ('powercfg /getacvalueindex SCHEME_CURRENT SUB_DISK DISKIDLE') do set "line=%%L"
+  ) else (
+    for /f "tokens=* delims=" %%L in ('powercfg /getdcvalueindex SCHEME_CURRENT SUB_DISK DISKIDLE') do set "line=%%L"
+  )
+  for /f "tokens=* delims=" %%D in ("!line!") do (
+    for /f "delims=0123456789" %%X in ("%%D") do (
+      set "temp=%%D"
+      setlocal DisableDelayedExpansion
+      for /f "tokens=* delims=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ: .=" %%N in ("!temp!") do endlocal & set "%~2=%%N"
+    )
+  )
+  goto :eof
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:format_display  secondsVar  displayVar
+  setlocal EnableDelayedExpansion
+  set "s=!%~1!"
+  if "!s!"=="" set "s=0"
+  set /a m = s / 60
+  if !m! equ 0 (
+    endlocal & set "%~2=Never"
+  ) else (
+    endlocal & set "%~2=!m! min"
+  )
+  goto :eof
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:set_timeout
+echo.
+set /p newMin="Enter new timeout in minutes (0 for Never): "
+
+rem Validate numeric input
+for /f "delims=0123456789" %%X in ("!newMin!") do (
+  echo.
+  echo %RED%Invalid number: %%X%RESET%
+  pause
+  goto show_panel
 )
-set /a "SECONDS=MIN*60"
-powercfg /setdcvalueindex SCHEME_CURRENT %GUID_DISK% %GUID_DISK_TIMEOUT% %SECONDS% >nul
-powercfg /setactive SCHEME_CURRENT >nul
-goto main
+
+set /a newSec=newMin*60
+
+echo.
+echo %ORANGE%Applying to %mode%...%RESET%
+if /I "%mode%"=="AC" (
+  powercfg /setacvalueindex SCHEME_CURRENT SUB_DISK DISKIDLE !newSec!
+) else (
+  powercfg /setdcvalueindex SCHEME_CURRENT SUB_DISK DISKIDLE !newSec!
+)
+
+powercfg /setactive SCHEME_CURRENT
+
+echo.
+echo %GREEN%%mode% disk timeout set to !newMin! minute(s).%RESET%
+echo.
+pause
+goto show_panel
