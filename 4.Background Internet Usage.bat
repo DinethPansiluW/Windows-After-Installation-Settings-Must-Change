@@ -1,6 +1,16 @@
 @echo off
 setlocal enabledelayedexpansion
 
+:: Define ESC character for ANSI codes (ASCII 27)
+for /F "delims=" %%A in ('echo prompt $E ^| cmd') do set "ESC=%%A"
+
+:: Set ANSI color escape codes (for supported terminals)
+set "GREEN=%ESC%[1;32m"
+set "RED=%ESC%[31m"
+set "ORANGE=%ESC%[33m"
+set "RESET=%ESC%[0m"
+set "SKYBLUE=%ESC%[96m"
+
 :: Check for admin rights
 net session >nul 2>&1
 if %errorlevel% neq 0 (
@@ -14,13 +24,6 @@ if %errorlevel% neq 0 (
     del "%temp%\getadmin.vbs"
     exit
 )
-
-:: Set ANSI color escape codes (for supported terminals)
-set "GREEN=[1;32m"
-set "RED=[31m"
-set "ORANGE=[33m"
-set "RESET=[0m"
-set "SKYBLUE=[96m"
 
 :: Ensure administrator
 net session >nul 2>&1
