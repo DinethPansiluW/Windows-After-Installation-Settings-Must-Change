@@ -1,0 +1,9 @@
+AC Screen OFF      = 5
+AC Sleep           = 15
+AC Hibernate       = 60
+AC HD OFF          = 5
+
+Battery Screen OFF = 5
+Battery Sleep      = 10
+Battery Hibernate  = 20
+Battery HD OFF     = 5
