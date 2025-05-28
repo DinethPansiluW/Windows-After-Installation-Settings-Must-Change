@@ -34,3 +34,11 @@ Pull requests are welcome! Feel free to open issues for any suggestions or impro
 
 Use these scripts at your own risk. Always review and understand code before running, especially when modifying system settings.
 
+---
+
+## 🧑‍💻 Author
+
+**Dineth Pansilu**  
+📫 Follow on GitHub: [DinethPansiluW](https://github.com/DinethPansiluW)
+
+---
