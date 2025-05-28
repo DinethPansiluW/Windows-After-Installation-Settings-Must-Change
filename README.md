@@ -4,6 +4,14 @@ This repository provides a comprehensive checklist and scripts for optimizing a 
 
 ---
 
+## 📥 Download
+
+👉 [Click here to download the ZIP](https://github.com/DinethPansiluW/Windows-After-Installation-Settings-Must-Change/archive/refs/heads/main.zip)
+
+Unzip the archive to get started with all scripts and instructions.
+
+---
+
 ## 🚀 Features
 
 - Disable unnecessary startup programs and services  
