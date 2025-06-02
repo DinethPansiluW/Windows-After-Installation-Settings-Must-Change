@@ -5,11 +5,11 @@ setlocal enabledelayedexpansion
 for /F "delims=" %%A in ('echo prompt $E ^| cmd') do set "ESC=%%A"
 
 :: Set ANSI color escape codes (for supported terminals)
-set "GREEN=%ESC%[1;32m"
-set "RED=%ESC%[31m"
-set "ORANGE=%ESC%[33m"
-set "RESET=%ESC%[0m"
-set "SKYBLUE=%ESC%[96m"
+set "GREEN=[1;32m"
+set "RED=[31m"
+set "ORANGE=[33m"
+set "RESET=[0m"
+set "SKYBLUE=[96m"
 
 :: Check for admin rights
 net session >nul 2>&1

@@ -1,6 +1,18 @@
 @echo off
 setlocal enabledelayedexpansion
 
+:: Check for admin rights
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    >"%temp%\getadmin.vbs" (
+        echo Set UAC = CreateObject^("Shell.Application"^)
+        echo UAC.ShellExecute "%~f0", "", "", "runas", 1
+    )
+    "%temp%\getadmin.vbs"
+    del "%temp%\getadmin.vbs"
+    exit
+)
+
 :: Set ANSI color escape codes using literal ESC (ASCII 27) character
 set "GREEN=[1;32m"
 set "RED=[31m"

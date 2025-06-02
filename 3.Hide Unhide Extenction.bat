@@ -1,6 +1,18 @@
 @echo off
 setlocal EnableDelayedExpansion
 
+:: Check for admin rights
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    >"%temp%\getadmin.vbs" (
+        echo Set UAC = CreateObject^("Shell.Application"^)
+        echo UAC.ShellExecute "%~f0", "", "", "runas", 1
+    )
+    "%temp%\getadmin.vbs"
+    del "%temp%\getadmin.vbs"
+    exit
+)
+
 :: Set color scheme
 color 0F
 mode con: cols=60 lines=25
@@ -30,8 +42,8 @@ echo.
 echo    !status_text!
 echo    --------------------------------
 echo.
-echo    1. Hide File Extensions
-echo    2. Show File Extensions
+echo    1. Show File Extensions
+echo    2. Hide File Extensions
 echo.
 echo    ================================
 echo.
@@ -39,11 +51,11 @@ echo.
 :choice
 set /p choice=    Enter your choice [1-2]: 
 
-if "%choice%"=="1" (
+if "%choice%"=="2" (
     reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 1 /f >nul
     color 0C
     echo    Setting changed: Extensions will be HIDDEN
-) else if "%choice%"=="2" (
+) else if "%choice%"=="1" (
     reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f >nul
     color 0A
     echo    Setting changed: Extensions will be SHOWN

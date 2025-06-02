@@ -30,9 +30,9 @@ for /f "tokens=3" %%a in ('reg query "HKEY_CURRENT_USER\Software\Microsoft\Windo
 
 :: Display current status with color
 if "%current%"=="0x1" (
-    echo %GREEN%Current Status: ENABLED%RESET%
+    echo Current Status: %GREEN%ENABLED%RESET%
 ) else (
-    echo %RED%Current Status: DISABLED%RESET%
+    echo Current Status: %RED%DISABLED%RESET%
 )
 
 echo.
