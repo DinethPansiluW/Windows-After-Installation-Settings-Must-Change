@@ -46,18 +46,18 @@ echo %SKYBLUE%===============================================================%RE
 echo.
 echo Current Status: %ORANGE%!startupSoundStatus!%RESET%
 echo.
-echo %GREEN%1.%RESET% Enable Startup Sound
-echo %RED%2.%RESET% Disable Startup Sound
+echo %RED%1.%RESET% Disable Startup Sound
+echo %GREEN%2.%RESET% Enable Startup Sound
 echo.
 echo %SKYBLUE%===============================================================%RESET%
 set /p choice=Choose an option (1 or 2): 
 
-if "!choice!"=="1" (
+if "!choice!"=="2" (
     reg add "HKCU\AppEvents\Schemes\Apps\.Default\WindowsLogon\.Current" /ve /d "C:\Windows\Media\Windows Logon.wav" /f >nul
     set "startupSoundStatus=ENABLED"
     echo.
     echo %GREEN%Startup sound ENABLED.%RESET%
-) else if "!choice!"=="2" (
+) else if "!choice!"=="1" (
     reg delete "HKCU\AppEvents\Schemes\Apps\.Default\WindowsLogon\.Current" /ve /f >nul
     set "startupSoundStatus=DISABLED"
     echo.

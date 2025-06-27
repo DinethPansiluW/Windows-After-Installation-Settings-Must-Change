@@ -43,13 +43,13 @@ if "%val%"=="default" (
 )
 
 echo.
-echo %GREEN%1.%RESET% Enable automatic updates
-echo %RED%2.%RESET% Disable automatic updates
+echo %RED%1.%RESET% Disable automatic updates
+echo %GREEN%2.%RESET% Enable automatic updates
 echo %YELLOW%3.%RESET% Exit
 set /p choice=%CYAN%Enter choice (1, 2 or 3): %RESET%
 
-if "%choice%"=="1" goto Enable
-if "%choice%"=="2" goto Disable
+if "%choice%"=="1" goto Disable
+if "%choice%"=="2" goto Enable
 if "%choice%"=="3" goto End
 
 echo %RED%Invalid choice. Try again.%RESET%

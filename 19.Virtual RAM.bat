@@ -86,6 +86,7 @@ powershell -command ^
 
 echo.
 echo Virtual memory settings updated successfully!
+timeout /t 2 /nobreak >nul
 echo.
 echo [Updated Virtual Memory Settings]
 powershell -command "Get-WmiObject Win32_PageFileSetting | Format-Table Name, InitialSize, MaximumSize -AutoSize"

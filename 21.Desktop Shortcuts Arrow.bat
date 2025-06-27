@@ -12,18 +12,26 @@ if %errorlevel% neq 0 (
     exit
 )
 
+:: Set ANSI color escape codes using literal ESC (ASCII 27) character
+set "GREEN=[1;32m"
+set "RED=[31m"
+set "YELLOW=[1;33m"
+set "CYAN=[36m"
+set "RESET=[0m"
+set "BLUE=[96m"
+
 :: Check current shortcut arrow status
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons" /v 29 >nul 2>&1
 if %errorlevel%==0 (
-    echo Current Status: Shortcut Arrows are HIDDEN
+    echo Current Status: Shortcut Arrows are %BLUE%HIDDEN%RESET%
 ) else (
-    echo Current Status: Shortcut Arrows are VISIBLE
+    echo Current Status: Shortcut Arrows are %GREEN%SHOWING%RESET%
 )
 
 echo.
 echo Select an option:
-echo [1] Show Shortcut Arrow
-echo [2] Hide Shortcut Arrow
+echo [1] %GREEN%Show%RESET% Shortcut Arrow
+echo [2] %BLUE%Hide%RESET% Shortcut Arrow
 echo.
 set /p choice=Enter your choice (1 or 2): 
 

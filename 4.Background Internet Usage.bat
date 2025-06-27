@@ -40,14 +40,14 @@ echo.
 echo %GREEN%Background Internet Usage Control Panel%RESET%
 echo ========================================
 echo.
-echo %GREEN%1.%RESET% Enable Background Internet Usage
-echo %GREEN%2.%RESET% Disable Background Internet Usage
+echo %GREEN%1.%RESET% Disable Background Internet Usage
+echo %GREEN%2.%RESET% Enable Background Internet Usage
 echo %GREEN%3.%RESET% Exit
 echo.
 set /p choice=Select option [1-3]: 
 
-if "%choice%"=="1" call :enable_bg_internet
-if "%choice%"=="2" call :disable_bg_internet
+if "%choice%"=="2" call :enable_bg_internet
+if "%choice%"=="1" call :disable_bg_internet
 if "%choice%"=="3" exit
 echo %RED%Invalid choice. Try again.%RESET%
 pause

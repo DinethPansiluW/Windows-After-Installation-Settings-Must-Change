@@ -37,14 +37,14 @@ echo.
 echo %GREEN%Background Apps Control Panel%RESET%
 echo =============================== 
 echo.
-echo %GREEN%1.%RESET% Enable Background Apps
-echo %GREEN%2.%RESET% Disable Background Apps
+echo %GREEN%1.%RESET% Disable Background Apps
+echo %GREEN%2.%RESET% Enable Background Apps
 echo %GREEN%3.%RESET% Exit
 echo.
 set /p choice=Select option [1-3]: 
 
-if "%choice%"=="1" call :enable_bg_apps
-if "%choice%"=="2" call :disable_bg_apps
+if "%choice%"=="2" call :enable_bg_apps
+if "%choice%"=="1" call :disable_bg_apps
 if "%choice%"=="3" exit
 echo %RED%Invalid choice. Try again.%RESET%
 pause

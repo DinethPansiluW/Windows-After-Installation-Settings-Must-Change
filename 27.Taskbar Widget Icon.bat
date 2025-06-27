@@ -1,36 +1,25 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-:: Enable ANSI escape sequences
-reg query HKCU\Console 2>nul || reg add HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul
-
-:: Set ANSI color escape codes
+:: ANSI color codes
 set "GREEN=[1;32m"
-set "GREENU=[4;32m"
 set "RED=[31m"
-set "ORANGE=[33m"
 set "RESET=[0m"
-set "PINK=[3;35m"
-set "SKYBLUE=[96m"
 
-:: Ensure admin rights
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-    >"%temp%\getadmin.vbs" (
-        echo Set UAC = CreateObject^("Shell.Application"^)
-        echo UAC.ShellExecute "%~f0", "", "", "runas", 1
-    )
-    "%temp%\getadmin.vbs"
-    del "%temp%\getadmin.vbs"
-    exit
+:: --- Read current widget state ---
+set "widgetValue=0"
+for /f "usebackq tokens=2,* skip=2" %%A in (`reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa 2^>nul`) do (
+    set "widgetValue=%%B"
 )
 
-:: Check current widget icon state (1 = shown, 0 = hidden)
-for /f "tokens=3" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa 2^>nul') do (
-    set "widgetValue=%%a"
+:: Convert hex to decimal if needed
+if /i "!widgetValue:~0,2!"=="0x" (
+    set /a widgetValueDec=!widgetValue!
+) else (
+    set /a widgetValueDec=!widgetValue!
 )
 
-if "!widgetValue!"=="1" (
+if "!widgetValueDec!"=="1" (
     set "widgetStatus=ENABLED"
 ) else (
     set "widgetStatus=DISABLED"
@@ -38,28 +27,26 @@ if "!widgetValue!"=="1" (
 
 :menu
 cls
-echo %SKYBLUE%===============================================================%RESET%
-echo %GREENU%         Taskbar Widgets Icon - Menu%RESET%
-echo %SKYBLUE%===============================================================%RESET%
+echo %GREEN%===============================================================%RESET%
+echo %GREEN%         Taskbar Widgets Icon - Menu%RESET%
+echo %GREEN%===============================================================%RESET%
 echo.
-echo Current Status: %ORANGE%!widgetStatus!%RESET%
+echo Current Status: !widgetStatus!
 echo.
-echo %GREEN%1.%RESET% Show Widgets Icon
-echo %RED%2.%RESET% Hide Widgets Icon
+echo %GREEN%1.%RESET% Hide Widgets Icon
+echo %GREEN%2.%RESET% Show Widgets Icon
+echo %RED%3.%RESET% Exit
 echo.
-echo %SKYBLUE%===============================================================%RESET%
-set /p choice=Choose an option (1 or 2): 
+set /p choice=Choose an option (1, 2, or 3): 
 
 if "!choice!"=="1" (
-    reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /t REG_DWORD /d 1 /f >nul
-    set "widgetStatus=ENABLED"
-    echo.
-    echo %GREEN%Widgets icon ENABLED. You may need to restart Explorer or sign out/in.%RESET%
+    call :SetWidgetState 0
+    goto menu
 ) else if "!choice!"=="2" (
-    reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /t REG_DWORD /d 0 /f >nul
-    set "widgetStatus=DISABLED"
-    echo.
-    echo %RED%Widgets icon DISABLED. You may need to restart Explorer or sign out/in.%RESET%
+    call :SetWidgetState 1
+    goto menu
+) else if "!choice!"=="3" (
+    exit /b
 ) else (
     echo.
     echo %RED%Invalid option. Try again.%RESET%
@@ -67,5 +54,30 @@ if "!choice!"=="1" (
     goto menu
 )
 
+goto :eof
+
+:SetWidgetState
+setlocal
+set "state=%1"
+
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /t REG_DWORD /d %state% /f >nul 2>&1
+if errorlevel 1 (
+    echo %RED%Failed to write registry key. Close apps or reboot and try again.%RESET%
+    pause
+    endlocal & exit /b 1
+)
+
+echo Restarting Explorer to apply changes...
+taskkill /f /im explorer.exe >nul
+timeout /t 2 >nul
+start explorer.exe
+
+if "%state%"=="1" (
+    echo %GREEN%Widgets icon ENABLED.%RESET%
+) else (
+    echo %RED%Widgets icon DISABLED.%RESET%
+)
+
 pause
-goto menu
+endlocal
+exit /b

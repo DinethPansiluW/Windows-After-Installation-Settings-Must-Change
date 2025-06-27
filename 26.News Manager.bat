@@ -24,17 +24,17 @@ echo %SKYBLUE%===============================================================%RE
 echo.
 echo Current Status: %ORANGE%!weatherStatus!%RESET%
 echo.
-echo %GREEN%1.%RESET% Enable
-echo %RED%2.%RESET% Disable
+echo %RED%1.%RESET% Disable
+echo %GREEN%2.%RESET% Enable
 echo.
 echo %SKYBLUE%===============================================================%RESET%
 set /p choice=Choose an option (1 or 2): 
 
-if "!choice!"=="1" (
+if "!choice!"=="2" (
     set "weatherStatus=ENABLED"
     echo.
     echo %GREEN%Weather display ENABLED.%RESET%
-) else if "!choice!"=="2" (
+) else if "!choice!"=="1" (
     set "weatherStatus=DISABLED"
     echo.
     echo %RED%Weather display DISABLED.%RESET%

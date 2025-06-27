@@ -44,18 +44,18 @@ echo %SKYBLUE%===============================================================%RE
 echo.
 echo Current Status: %ORANGE%!searchStatus!%RESET%
 echo.
-echo %GREEN%1.%RESET% Show Search Icon
-echo %RED%2.%RESET% Hide Search Icon
+echo %RED%1.%RESET% Hide Search Icon
+echo %GREEN%2.%RESET% Show Search Icon
 echo.
 echo %SKYBLUE%===============================================================%RESET%
 set /p choice=Choose an option (1 or 2): 
 
-if "!choice!"=="1" (
+if "!choice!"=="2" (
     reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 1 /f >nul
     set "searchStatus=ENABLED"
     echo.
     echo %GREEN%Search icon ENABLED. Restart Explorer or sign out/in to apply changes.%RESET%
-) else if "!choice!"=="2" (
+) else if "!choice!"=="1" (
     reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 0 /f >nul
     set "searchStatus=DISABLED"
     echo.

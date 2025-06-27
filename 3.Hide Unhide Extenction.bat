@@ -13,9 +13,9 @@ if %errorlevel% neq 0 (
     exit
 )
 
-:: Set color scheme
-color 0F
-mode con: cols=60 lines=25
+:: Set default UI color
+color 1F
+mode con: cols=65 lines=30
 title File Extension Visibility Manager
 
 :: Read current setting
@@ -23,29 +23,23 @@ for /f "tokens=3" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVer
     set "current=%%a"
 )
 
-:: Convert numeric value to text
-if "!current!"=="0" (
-    set "status_text=Currently: SHOWN (Disabled)"
+:: Determine current status
+if "!current!"=="0x0" (
+    set "status_text=Extensions are currently: SHOWN"
     set "status_color=0A"
 ) else (
-    set "status_text=Currently: HIDDEN (Enabled)"
+    set "status_text=Extensions are currently: HIDDEN"
     set "status_color=0C"
 )
 
-:: Display UI
-cls
+:: Display Header
+call :drawHeader
+call :coloredEcho !status_color! "!status_text!"
 echo.
-echo    ================================
-echo     FILE EXTENSION VISIBILITY MANAGER
-echo    ================================
-echo.
-echo    !status_text!
-echo    --------------------------------
-echo.
+echo    ---------------------------------------------
 echo    1. Show File Extensions
 echo    2. Hide File Extensions
-echo.
-echo    ================================
+echo    ---------------------------------------------
 echo.
 
 :choice
@@ -53,27 +47,53 @@ set /p choice=    Enter your choice [1-2]:
 
 if "%choice%"=="2" (
     reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 1 /f >nul
-    color 0C
-    echo    Setting changed: Extensions will be HIDDEN
+    color 4F
+    echo.
+    echo    Setting changed: Extensions will now be HIDDEN
 ) else if "%choice%"=="1" (
     reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f >nul
-    color 0A
-    echo    Setting changed: Extensions will be SHOWN
+    color 2F
+    echo.
+    echo    Setting changed: Extensions will now be SHOWN
 ) else (
+    color 6F
+    echo.
     echo    Invalid choice. Please enter 1 or 2.
+    timeout /t 2 >nul
     goto choice
 )
 
-:: Restart Explorer to apply changes
+:: Restart Explorer
 echo.
+color 3F
 echo    Restarting File Explorer to apply changes...
-echo.
 timeout /t 2 /nobreak >nul
 taskkill /f /im explorer.exe >nul
 start explorer.exe
 
-:: Final message
+:: Completion
+color 1F
+echo.
 echo    Operation completed successfully!
 echo.
 pause
 endlocal
+exit /b
+
+:: === Draw Header ===
+:drawHeader
+color 5F
+echo.
+echo    =========================================================
+echo                     FILE EXTENSION MANAGER                  
+echo    =========================================================
+color 1F
+exit /b
+
+:: === Colored Echo ===
+:coloredEcho
+:: %1 = color code, %2 = message
+color %1
+echo    %~2
+color 1F
+exit /b

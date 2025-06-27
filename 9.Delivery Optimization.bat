@@ -47,14 +47,14 @@ echo %YELLOW%When Enabled:%RESET%
 echo Advantages: %PINK%Speeds up updates and reduces internet bandwidth usage.%RESET%
 echo Disadvantages: %PINK%Can use local network and internet resources, potentially affecting performance.%RESET%
 echo.
-echo %GREEN%1.%RESET% Enable Delivery Optimization
-echo %GREEN%2.%RESET% Disable Delivery Optimization
+echo %GREEN%1.%RESET% Disable Delivery Optimization
+echo %GREEN%2.%RESET% Enable Delivery Optimization
 echo %GREEN%3.%RESET% Exit
 echo.
 set /p choice=%CYAN%Select option [1-3]: %RESET%
 
-if "%choice%"=="1" call :enable_dosvc & goto main_menu
-if "%choice%"=="2" call :disable_dosvc & goto main_menu
+if "%choice%"=="2" call :enable_dosvc & goto main_menu
+if "%choice%"=="1" call :disable_dosvc & goto main_menu
 if "%choice%"=="3" exit
 
 echo %RED%Invalid choice. Try again.%RESET%
